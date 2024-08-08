@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from '../integrations/supabase';
@@ -12,10 +12,24 @@ const RegisterModal = ({ isOpen, onClose }) => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [lastAttempt, setLastAttempt] = useState(0);
   const { toast } = useToast();
+
+  useEffect(() => {
+    // Clear error when modal is opened
+    if (isOpen) {
+      setError('');
+    }
+  }, [isOpen]);
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    const now = Date.now();
+    if (now - lastAttempt < 60000) { // 1 minute cooldown
+      setError('Please wait a moment before trying again.');
+      return;
+    }
+    setLastAttempt(now);
     setLoading(true);
     setError('');
     try {
@@ -53,10 +67,14 @@ const RegisterModal = ({ isOpen, onClose }) => {
         onClose();
       }
     } catch (error) {
-      setError(error.message);
+      let errorMessage = error.message;
+      if (error.message.includes('Email rate limit exceeded')) {
+        errorMessage = 'Too many registration attempts. Please try again later.';
+      }
+      setError(errorMessage);
       toast({
         title: "Registration failed",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
