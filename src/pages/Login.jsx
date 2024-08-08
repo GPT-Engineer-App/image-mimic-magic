@@ -42,18 +42,16 @@ const Login = () => {
 
       if (userError) throw userError;
 
+      // Store user data in localStorage
+      localStorage.setItem('userData', JSON.stringify(userData));
+
       toast({
         title: "Login successful",
         description: "You have been logged in successfully.",
       });
 
-      // Store user data in localStorage
-      localStorage.setItem('userData', JSON.stringify(userData));
-
-      // Redirect to home page after a short delay
-      setTimeout(() => {
-        navigate('/');
-      }, 1000);
+      // Redirect to home page immediately
+      navigate('/');
     } catch (error) {
       toast({
         title: "Login failed",
