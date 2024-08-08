@@ -10,14 +10,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { User, Settings, LogOut } from 'lucide-react';
 
-const Index = ({ balances = {} }) => {
+const Index = () => {
   const { session, logout } = useSupabaseAuth() || {};
   const [username, setUsername] = useState('');
+  const [balances, setBalances] = useState({});
   const navigate = useNavigate();
   const [wagerAmount, setWagerAmount] = useState(10);
   const [winChance, setWinChance] = useState(50);
   const [currency, setCurrency] = useState('BTC');
-  const currencies = Object.keys(balances || {});
+  const currencies = Object.keys(balances);
 
   useEffect(() => {
     if (session) {
@@ -29,12 +30,24 @@ const Index = ({ balances = {} }) => {
     if (session?.user?.id) {
       const { data, error } = await supabase
         .from('users')
-        .select('username')
+        .select('username, balance')
         .eq('id', session.user.id)
         .single();
 
       if (data) {
         setUsername(data.username);
+        if (data.balance) {
+          try {
+            const parsedBalances = JSON.parse(data.balance);
+            setBalances(parsedBalances);
+            if (!currency || !parsedBalances[currency]) {
+              setCurrency(Object.keys(parsedBalances)[0] || 'BTC');
+            }
+          } catch (e) {
+            console.error('Error parsing balances:', e);
+            setBalances({});
+          }
+        }
       }
     }
   };
@@ -57,20 +70,22 @@ const Index = ({ balances = {} }) => {
           </div>
           {session && (
             <div className="flex items-center space-x-4">
-              <Select value={currency} onValueChange={setCurrency}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue>
-                    Balance: {balances[currency]?.toFixed(4) || '0.0000'} {currency}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {currencies.map((curr) => (
-                    <SelectItem key={curr} value={curr}>
-                      {curr}: {balances[curr]?.toFixed(4) || '0.0000'}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {session && (
+                <Select value={currency} onValueChange={setCurrency}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue>
+                      Balance: {balances[currency]?.toFixed(4) || '0.0000'} {currency}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {currencies.map((curr) => (
+                      <SelectItem key={curr} value={curr}>
+                        {curr}: {balances[curr]?.toFixed(4) || '0.0000'}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
               <DropdownMenu>
                 <DropdownMenuTrigger>
                   <Avatar>
