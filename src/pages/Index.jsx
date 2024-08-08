@@ -22,6 +22,7 @@ const Index = () => {
   const currencies = Object.keys(balances);
   const { toast } = useToast();
   const [clientSeed, setClientSeed] = useState('');
+  const [serverSeedHash, setServerSeedHash] = useState('');
   const [loading, setLoading] = useState(false);
   const [recentBets, setRecentBets] = useState([]);
 
@@ -222,11 +223,11 @@ const Index = () => {
             </div>
 
             <div>
-              <label htmlFor="server-seed" className="block text-sm font-medium text-muted-foreground mb-1">Server Seed Hash:</label>
+              <label htmlFor="server-seed-hash" className="block text-sm font-medium text-muted-foreground mb-1">Server Seed Hash:</label>
               <Input
-                id="server-seed"
-                value={serverSeed}
-                onChange={(e) => setServerSeed(e.target.value)}
+                id="server-seed-hash"
+                value={serverSeedHash}
+                onChange={(e) => setServerSeedHash(e.target.value)}
                 className="w-full text-xs"
               />
             </div>
