@@ -5,10 +5,14 @@ import { Button } from "@/components/ui/button";
 import { useSupabaseAuth } from '../integrations/supabase/auth';
 import { supabase } from '../integrations/supabase';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { User, Settings, LogOut } from 'lucide-react';
 
 const Index = ({ balances = {} }) => {
-  const { session } = useSupabaseAuth() || {};
+  const { session, logout } = useSupabaseAuth() || {};
   const [username, setUsername] = useState('');
+  const navigate = useNavigate();
   const [wagerAmount, setWagerAmount] = useState(10);
   const [winChance, setWinChance] = useState(50);
   const [currency, setCurrency] = useState('BTC');
@@ -52,7 +56,6 @@ const Index = ({ balances = {} }) => {
           </div>
           {session && (
             <div className="flex items-center space-x-4">
-              <span className="text-sm">{username}</span>
               <Select value={currency} onValueChange={setCurrency}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue>
@@ -67,6 +70,31 @@ const Index = ({ balances = {} }) => {
                   ))}
                 </SelectContent>
               </Select>
+              <DropdownMenu>
+                <DropdownMenuTrigger>
+                  <Avatar>
+                    <AvatarImage src={`https://api.dicebear.com/6.x/initials/svg?seed=${username}`} />
+                    <AvatarFallback>{username.charAt(0).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate('/profile')}>
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Profile</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/settings')}>
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Settings</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={logout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           )}
         </nav>
