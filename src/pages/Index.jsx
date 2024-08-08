@@ -7,7 +7,7 @@ import { supabase } from '../integrations/supabase';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const Index = () => {
-  const { session } = useSupabaseAuth();
+  const { session } = useSupabaseAuth() || {};
   const [balance, setBalance] = useState(0.0000);
   const [username, setUsername] = useState('');
   const [wagerAmount, setWagerAmount] = useState(10);
