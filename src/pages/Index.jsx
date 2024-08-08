@@ -112,6 +112,22 @@ const Index = () => {
       // Set bet result
       setBetResult({ result, payout });
 
+      // Insert bet into bets table
+      const { error: insertError } = await supabase
+        .from('bets')
+        .insert({
+          user_id: session.user.id,
+          wager_amount: wagerAmount,
+          win_chance: winChance,
+          currency: currency,
+          result: result,
+          payout: payout,
+          client_seed: clientSeed,
+          server_seed_hash: serverSeedHash,
+        });
+
+      if (insertError) throw insertError;
+
       toast({
         title: result ? "You won!" : "You lost",
         description: `New balance: ${updatedBalance.toFixed(4)} ${currency}`,
