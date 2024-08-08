@@ -24,8 +24,18 @@ const App = () => {
           .single();
 
         if (data && data.balance) {
-          setBalances(JSON.parse(data.balance));
+          try {
+            const parsedBalances = JSON.parse(data.balance);
+            setBalances(parsedBalances || {});
+          } catch (e) {
+            console.error('Error parsing balances:', e);
+            setBalances({});
+          }
+        } else {
+          setBalances({});
         }
+      } else {
+        setBalances({});
       }
     };
 

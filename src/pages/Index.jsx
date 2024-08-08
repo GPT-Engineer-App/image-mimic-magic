@@ -6,13 +6,13 @@ import { useSupabaseAuth } from '../integrations/supabase/auth';
 import { supabase } from '../integrations/supabase';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-const Index = ({ balances }) => {
+const Index = ({ balances = {} }) => {
   const { session } = useSupabaseAuth() || {};
   const [username, setUsername] = useState('');
   const [wagerAmount, setWagerAmount] = useState(10);
   const [winChance, setWinChance] = useState(50);
   const [currency, setCurrency] = useState('BTC');
-  const currencies = Object.keys(balances);
+  const currencies = Object.keys(balances || {});
 
   useEffect(() => {
     if (session) {
