@@ -6,9 +6,8 @@ import { useSupabaseAuth } from '../integrations/supabase/auth';
 import { supabase } from '../integrations/supabase';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-const Index = () => {
+const Index = ({ balance }) => {
   const { session } = useSupabaseAuth() || {};
-  const [balance, setBalance] = useState(0.0000);
   const [username, setUsername] = useState('');
   const [wagerAmount, setWagerAmount] = useState(10);
   const [winChance, setWinChance] = useState(50);
@@ -24,13 +23,12 @@ const Index = () => {
     if (session?.user?.id) {
       const { data, error } = await supabase
         .from('users')
-        .select('username, balance')
+        .select('username')
         .eq('id', session.user.id)
         .single();
 
       if (data) {
         setUsername(data.username);
-        setBalance(data.balance);
       }
     }
   };
