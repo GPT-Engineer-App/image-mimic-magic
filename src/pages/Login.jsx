@@ -38,6 +38,7 @@ const Login = () => {
       // Store user data in localStorage
       localStorage.setItem('userData', JSON.stringify(userData));
 
+      // Redirect to home page
       navigate('/');
     } catch (error) {
       toast({
