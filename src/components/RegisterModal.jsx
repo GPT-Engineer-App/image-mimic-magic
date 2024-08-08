@@ -12,7 +12,6 @@ const RegisterModal = ({ isOpen, onClose }) => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [lastAttempt, setLastAttempt] = useState(0);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -24,12 +23,6 @@ const RegisterModal = ({ isOpen, onClose }) => {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    const now = Date.now();
-    if (now - lastAttempt < 60000) { // 1 minute cooldown
-      setError('Please wait a moment before trying again.');
-      return;
-    }
-    setLastAttempt(now);
     setLoading(true);
     setError('');
     try {
