@@ -8,11 +8,11 @@ export const navItems = [
   {
     title: "Home",
     to: "/",
-    page: <Index />,
+    page: Index,
   },
   {
     title: "Login",
     to: "/login",
-    page: <Login />,
+    page: Login,
   },
 ];

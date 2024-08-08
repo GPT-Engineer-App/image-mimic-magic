@@ -46,8 +46,8 @@ const App = () => {
           <Toaster />
           <BrowserRouter>
             <Routes>
-              {navItems.map(({ to, page: Page }) => (
-                <Route key={to} path={to} element={<Page balance={balance} />} />
+              {navItems.map(({ to, page }) => (
+                <Route key={to} path={to} element={React.createElement(page, { balance })} />
               ))}
             </Routes>
           </BrowserRouter>
