@@ -30,6 +30,10 @@ const Index = ({ setShowLoginModal }) => {
   const [betResult, setBetResult] = useState(null);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
 
+  const handleRegisterClick = () => {
+    setShowRegisterModal(true);
+  };
+
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem('userData'));
     if (userData) {
@@ -187,7 +191,7 @@ const Index = ({ setShowLoginModal }) => {
             <a href="#" className="text-muted-foreground">Verification</a>
             <a href="#" className="text-muted-foreground">Admin</a>
             <a href="#" className="text-muted-foreground">Wallet</a>
-            {!session && <a href="#" onClick={() => setShowRegisterModal(true)} className="text-muted-foreground">Register</a>}
+            {!session && <a href="#" onClick={handleRegisterClick} className="text-muted-foreground">Register</a>}
             {!session && <a href="#" onClick={() => setShowLoginModal(true)} className="text-muted-foreground">Login</a>}
           </div>
           {session && (
@@ -338,7 +342,10 @@ const Index = ({ setShowLoginModal }) => {
           </div>
         </div>
       </main>
-      <RegisterModal isOpen={showRegisterModal} onClose={() => setShowRegisterModal(false)} />
+      <RegisterModal 
+        isOpen={showRegisterModal} 
+        onClose={() => setShowRegisterModal(false)} 
+      />
     </div>
   );
 };
