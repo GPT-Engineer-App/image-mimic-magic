@@ -46,7 +46,6 @@ const Profile = () => {
       }
 
       const { error } = await supabase.auth.updateUser(updates);
-
       if (error) throw error;
 
       toast({
