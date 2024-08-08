@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { User, Settings, LogOut } from 'lucide-react';
+import { useToast } from "@/components/ui/use-toast";
 
 const Index = () => {
   const { session, logout } = useSupabaseAuth() || {};
@@ -19,6 +20,10 @@ const Index = () => {
   const [winChance, setWinChance] = useState(50);
   const [currency, setCurrency] = useState('BTC');
   const currencies = Object.keys(balances);
+  const { toast } = useToast();
+  const [clientSeed, setClientSeed] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [recentBets, setRecentBets] = useState([]);
 
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem('userData'));
@@ -37,6 +42,7 @@ const Index = () => {
         }
       }
     }
+    fetchRecentBets();
   }, []);
 
   const handleLogout = async () => {
@@ -44,8 +50,79 @@ const Index = () => {
     localStorage.removeItem('userData');
     navigate('/login');
   };
-  const [serverSeed, setServerSeed] = useState('c8544bd4cf552d647175c000184329ad23af31099163601f');
-  const [clientSeed, setClientSeed] = useState('bcd4wlgbdp4871fxbtzq');
+
+  const fetchRecentBets = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('bets')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (error) throw error;
+      setRecentBets(data);
+    } catch (error) {
+      console.error('Error fetching recent bets:', error);
+    }
+  };
+
+  const rollDice = async () => {
+    if (!session) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to play.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('roll-dice', {
+        body: JSON.stringify({
+          wagerAmount,
+          winChance,
+          clientSeed: clientSeed || undefined,
+          currency,
+        }),
+      });
+
+      if (error) throw error;
+
+      const { result, updatedBalance, betId } = data;
+
+      // Update local balance
+      setBalances(prev => ({
+        ...prev,
+        [currency]: updatedBalance,
+      }));
+
+      // Update localStorage
+      const userData = JSON.parse(localStorage.getItem('userData'));
+      userData.balance = JSON.stringify({
+        ...JSON.parse(userData.balance),
+        [currency]: updatedBalance,
+      });
+      localStorage.setItem('userData', JSON.stringify(userData));
+
+      toast({
+        title: result ? "You won!" : "You lost",
+        description: `New balance: ${updatedBalance.toFixed(4)} ${currency}`,
+        variant: result ? "default" : "destructive",
+      });
+
+      // Refresh recent bets
+      fetchRecentBets();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -164,8 +241,9 @@ const Index = () => {
               />
             </div>
 
-            <Button className="w-full">Roll Dice</Button>
-            <Button variant="secondary" className="w-full">End Game</Button>
+            <Button className="w-full" onClick={rollDice} disabled={loading}>
+              {loading ? 'Rolling...' : 'Roll Dice'}
+            </Button>
           </div>
         </div>
 
@@ -184,7 +262,16 @@ const Index = () => {
                 </tr>
               </thead>
               <tbody>
-                {/* Add table rows here when you have data */}
+                {recentBets.map((bet) => (
+                  <tr key={bet.id}>
+                    <td className="px-4 py-2">{bet.user_id}</td>
+                    <td className="px-4 py-2">{bet.win_chance}%</td>
+                    <td className="px-4 py-2">{bet.wager_amount} {bet.currency}</td>
+                    <td className="px-4 py-2">{bet.result ? 'Win' : 'Loss'}</td>
+                    <td className="px-4 py-2">{bet.payout} {bet.currency}</td>
+                    <td className="px-4 py-2">{bet.id}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
