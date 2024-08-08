@@ -21,17 +21,17 @@ const fromSupabase = async (query) => {
 
 ### bets
 
-| name         | type                     | format  | required |
-|--------------|--------------------------|---------|----------|
-| id           | int8                     | number  | true     |
-| created_at   | timestamp with time zone | string  | true     |
-| user_id      | int8                     | number  | false    |
-| wager_amount | numeric                  | number  | false    |
-| win_chance   | numeric                  | number  | false    |
-| result       | boolean                  | boolean | false    |
-| currency     | text                     | string  | false    |
-| server_seed  | text                     | string  | false    |
-| client_seed  | text                     | string  | false    |
+| name         | type                     | format | required |
+|--------------|--------------------------|--------|----------|
+| id           | int8                     | number | true     |
+| created_at   | timestamp with time zone | string | true     |
+| user_id      | int8                     | number | false    |
+| wager_amount | numeric                  | number | false    |
+| win_chance   | numeric                  | number | false    |
+| result       | boolean                  | boolean| false    |
+| currency     | text                     | string | false    |
+| server_seed  | text                     | string | false    |
+| client_seed  | text                     | string | false    |
 
 ### users
 
@@ -40,7 +40,7 @@ const fromSupabase = async (query) => {
 | id         | int8                     | number | true     |
 | created_at | timestamp with time zone | string | true     |
 | username   | text                     | string | false    |
-| balance    | json                     | json   | false    |
+| balance    | json                     | object | false    |
 | email      | text                     | string | false    |
 | password   | text                     | string | false    |
 
