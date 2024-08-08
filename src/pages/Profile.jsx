@@ -30,7 +30,7 @@ const Profile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!passwordsMatch) {
+    if (password && !passwordsMatch) {
       toast({
         title: "Password mismatch",
         description: "The new passwords do not match. Please try again.",
@@ -40,9 +40,26 @@ const Profile = () => {
     }
 
     try {
-      const updates = { email };
+      let updates = {};
+      let hasUpdates = false;
+
+      if (email !== session.user.email) {
+        updates.email = email;
+        hasUpdates = true;
+      }
+
       if (password) {
         updates.password = password;
+        hasUpdates = true;
+      }
+
+      if (!hasUpdates) {
+        toast({
+          title: "No changes",
+          description: "No changes were made to your profile.",
+          variant: "warning",
+        });
+        return;
       }
 
       const { data, error } = await supabase.auth.updateUser(updates);
@@ -60,12 +77,16 @@ const Profile = () => {
 
         // Update email state if it was changed
         setEmail(data.user.email);
-      } else {
-        toast({
-          title: "Update failed",
-          description: "No changes were made to your profile.",
-          variant: "warning",
-        });
+
+        // Update the session
+        const { data: newSession, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) throw sessionError;
+        if (newSession) {
+          // Update the session in your auth context or state management
+          // This depends on how you're managing the session in your app
+          // For example, if you're using a context:
+          // setSession(newSession.session);
+        }
       }
     } catch (error) {
       toast({
