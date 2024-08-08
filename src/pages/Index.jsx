@@ -12,7 +12,7 @@ import { User, Settings, LogOut } from 'lucide-react';
 
 const Index = () => {
   const { session, logout } = useSupabaseAuth() || {};
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [balances, setBalances] = useState({});
   const navigate = useNavigate();
   const [wagerAmount, setWagerAmount] = useState(10);
@@ -21,35 +21,28 @@ const Index = () => {
   const currencies = Object.keys(balances);
 
   useEffect(() => {
-    if (session) {
-      fetchUserData();
-    }
-  }, [session]);
-
-  const fetchUserData = async () => {
-    if (session?.user?.id) {
-      const { data, error } = await supabase
-        .from('users')
-        .select('username, balance')
-        .eq('id', session.user.id)
-        .single();
-
-      if (data) {
-        setUsername(data.username);
-        if (data.balance) {
-          try {
-            const parsedBalances = JSON.parse(data.balance);
-            setBalances(parsedBalances);
-            if (!currency || !parsedBalances[currency]) {
-              setCurrency(Object.keys(parsedBalances)[0] || 'BTC');
-            }
-          } catch (e) {
-            console.error('Error parsing balances:', e);
-            setBalances({});
+    const userData = JSON.parse(localStorage.getItem('userData'));
+    if (userData) {
+      setEmail(userData.email);
+      if (userData.balance) {
+        try {
+          const parsedBalances = JSON.parse(userData.balance);
+          setBalances(parsedBalances);
+          if (!currency || !parsedBalances[currency]) {
+            setCurrency(Object.keys(parsedBalances)[0] || 'BTC');
           }
+        } catch (e) {
+          console.error('Error parsing balances:', e);
+          setBalances({});
         }
       }
     }
+  }, []);
+
+  const handleLogout = async () => {
+    await logout();
+    localStorage.removeItem('userData');
+    navigate('/login');
   };
   const [serverSeed, setServerSeed] = useState('c8544bd4cf552d647175c000184329ad23af31099163601f');
   const [clientSeed, setClientSeed] = useState('bcd4wlgbdp4871fxbtzq');
@@ -89,12 +82,12 @@ const Index = () => {
               <DropdownMenu>
                 <DropdownMenuTrigger>
                   <Avatar>
-                    <AvatarImage src={`https://api.dicebear.com/6.x/initials/svg?seed=${username}`} />
-                    <AvatarFallback>{username.charAt(0).toUpperCase()}</AvatarFallback>
+                    <AvatarImage src={`https://api.dicebear.com/6.x/initials/svg?seed=${email}`} />
+                    <AvatarFallback>{email.charAt(0).toUpperCase()}</AvatarFallback>
                   </Avatar>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuLabel>{email}</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => navigate('/profile')}>
                     <User className="mr-2 h-4 w-4" />
@@ -105,7 +98,7 @@ const Index = () => {
                     <span>Settings</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={logout}>
+                  <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="mr-2 h-4 w-4" />
                     <span>Log out</span>
                   </DropdownMenuItem>

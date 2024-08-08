@@ -14,17 +14,30 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) throw error;
 
+      // Fetch user data
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('email, balance')
+        .eq('id', data.user.id)
+        .single();
+
+      if (userError) throw userError;
+
       toast({
         title: "Login successful",
         description: "You have been logged in successfully.",
       });
+
+      // Store user data in localStorage
+      localStorage.setItem('userData', JSON.stringify(userData));
+
       navigate('/');
     } catch (error) {
       toast({
