@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useSupabaseAuth } from '../integrations/supabase/auth';
 import { supabase } from '../integrations/supabase';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -25,6 +26,7 @@ const Index = () => {
   const [serverSeedHash, setServerSeedHash] = useState('');
   const [loading, setLoading] = useState(false);
   const [recentBets, setRecentBets] = useState([]);
+  const [betResult, setBetResult] = useState(null);
 
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem('userData'));
@@ -68,6 +70,7 @@ const Index = () => {
   };
 
   const rollDice = async () => {
+    setBetResult(null);
     if (!session) {
       toast({
         title: "Error",
@@ -90,7 +93,7 @@ const Index = () => {
 
       if (error) throw error;
 
-      const { result, updatedBalance, betId } = data;
+      const { result, updatedBalance, betId, payout } = data;
 
       // Update local balance
       setBalances(prev => ({
@@ -105,6 +108,9 @@ const Index = () => {
         [currency]: updatedBalance,
       });
       localStorage.setItem('userData', JSON.stringify(userData));
+
+      // Set bet result
+      setBetResult({ result, payout });
 
       toast({
         title: result ? "You won!" : "You lost",
@@ -246,6 +252,15 @@ const Index = () => {
               {loading ? 'Rolling...' : 'Roll Dice'}
             </Button>
           </div>
+          
+          {betResult && (
+            <Alert className="mt-4" variant={betResult.result ? "default" : "destructive"}>
+              <AlertTitle>{betResult.result ? "You won!" : "You lost"}</AlertTitle>
+              <AlertDescription>
+                Payout: {betResult.payout} {currency}
+              </AlertDescription>
+            </Alert>
+          )}
         </div>
 
         <div className="mt-8">
