@@ -21,40 +21,40 @@ const fromSupabase = async (query) => {
 
 ### bets
 
-| name         | type                       | format | required |
-|--------------|----------------------------|--------|----------|
-| id           | int8                       | number | true     |
-| created_at   | timestamp with time zone   | string | true     |
-| user_id      | int8                       | number | false    |
-| wager_amount | numeric                    | number | false    |
-| win_chance   | numeric                    | number | false    |
-| result       | boolean                    | boolean| false    |
-| currency     | text                       | string | false    |
-| server_seed  | text                       | string | false    |
-| client_seed  | text                       | string | false    |
+| name         | type                     | format  | required |
+|--------------|--------------------------|---------|----------|
+| id           | int8                     | number  | true     |
+| created_at   | timestamp with time zone | string  | true     |
+| user_id      | int8                     | number  | false    |
+| wager_amount | numeric                  | number  | false    |
+| win_chance   | numeric                  | number  | false    |
+| result       | boolean                  | boolean | false    |
+| currency     | text                     | string  | false    |
+| server_seed  | text                     | string  | false    |
+| client_seed  | text                     | string  | false    |
 
 ### users
 
-| name       | type                       | format | required |
-|------------|----------------------------|--------|----------|
-| id         | int8                       | number | true     |
-| created_at | timestamp with time zone   | string | true     |
-| username   | text                       | string | false    |
-| balance    | json                       | object | false    |
-| email      | text                       | string | false    |
-| password   | text                       | string | false    |
+| name       | type                     | format | required |
+|------------|--------------------------|--------|----------|
+| id         | int8                     | number | true     |
+| created_at | timestamp with time zone | string | true     |
+| username   | text                     | string | false    |
+| balance    | json                     | json   | false    |
+| email      | text                     | string | false    |
+| password   | text                     | string | false    |
 
 */
 
 // Bets hooks
 export const useBets = () => useQuery({
     queryKey: ['bets'],
-    queryFn: () => fromSupabase(supabase.from('bets').select('*')),
+    queryFn: () => fromSupabase(supabase.from('bets').select('*'))
 });
 
 export const useBet = (id) => useQuery({
     queryKey: ['bets', id],
-    queryFn: () => fromSupabase(supabase.from('bets').select('*').eq('id', id).single()),
+    queryFn: () => fromSupabase(supabase.from('bets').select('*').eq('id', id).single())
 });
 
 export const useAddBet = () => {
@@ -90,12 +90,12 @@ export const useDeleteBet = () => {
 // Users hooks
 export const useUsers = () => useQuery({
     queryKey: ['users'],
-    queryFn: () => fromSupabase(supabase.from('users').select('*')),
+    queryFn: () => fromSupabase(supabase.from('users').select('*'))
 });
 
 export const useUser = (id) => useQuery({
     queryKey: ['users', id],
-    queryFn: () => fromSupabase(supabase.from('users').select('*').eq('id', id).single()),
+    queryFn: () => fromSupabase(supabase.from('users').select('*').eq('id', id).single())
 });
 
 export const useAddUser = () => {
