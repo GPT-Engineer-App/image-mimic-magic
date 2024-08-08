@@ -1,12 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useSupabaseAuth } from '../integrations/supabase/auth';
+import { supabase } from '../integrations/supabase';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const Index = () => {
+  const { session } = useSupabaseAuth();
   const [balance, setBalance] = useState(0.0000);
+  const [username, setUsername] = useState('');
   const [wagerAmount, setWagerAmount] = useState(10);
   const [winChance, setWinChance] = useState(50);
+  const [currency, setCurrency] = useState('BTC');
+
+  useEffect(() => {
+    if (session) {
+      fetchUserData();
+    }
+  }, [session]);
+
+  const fetchUserData = async () => {
+    if (session?.user?.id) {
+      const { data, error } = await supabase
+        .from('users')
+        .select('username, balance')
+        .eq('id', session.user.id)
+        .single();
+
+      if (data) {
+        setUsername(data.username);
+        setBalance(data.balance);
+      }
+    }
+  };
   const [serverSeed, setServerSeed] = useState('c8544bd4cf552d647175c000184329ad23af31099163601f');
   const [clientSeed, setClientSeed] = useState('bcd4wlgbdp4871fxbtzq');
 
@@ -21,12 +48,26 @@ const Index = () => {
             <a href="#" className="text-muted-foreground">Verification</a>
             <a href="#" className="text-muted-foreground">Admin</a>
             <a href="#" className="text-muted-foreground">Wallet</a>
-            <a href="#" className="text-muted-foreground">Register</a>
-            <a href="#" className="text-muted-foreground">Login</a>
+            {!session && <a href="#" className="text-muted-foreground">Register</a>}
+            {!session && <a href="#" className="text-muted-foreground">Login</a>}
           </div>
-          <div className="text-sm">
-            Balance: NaN BTC
-          </div>
+          {session && (
+            <div className="flex items-center space-x-4">
+              <span className="text-sm">{username}</span>
+              <Select value={currency} onValueChange={setCurrency}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue>
+                    Balance: {balance.toFixed(4)} {currency}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="BTC">BTC</SelectItem>
+                  <SelectItem value="ETH">ETH</SelectItem>
+                  <SelectItem value="USD">USD</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </nav>
       </header>
 
