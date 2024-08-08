@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { User, Settings, LogOut } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
+import RegisterModal from '../components/RegisterModal';
 
 const Index = ({ setShowLoginModal }) => {
   const { session, logout } = useSupabaseAuth() || {};
@@ -27,6 +28,7 @@ const Index = ({ setShowLoginModal }) => {
   const [loading, setLoading] = useState(false);
   const [recentBets, setRecentBets] = useState([]);
   const [betResult, setBetResult] = useState(null);
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
 
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem('userData'));
@@ -185,7 +187,7 @@ const Index = ({ setShowLoginModal }) => {
             <a href="#" className="text-muted-foreground">Verification</a>
             <a href="#" className="text-muted-foreground">Admin</a>
             <a href="#" className="text-muted-foreground">Wallet</a>
-            {!session && <a href="#" className="text-muted-foreground">Register</a>}
+            {!session && <a href="#" onClick={() => setShowRegisterModal(true)} className="text-muted-foreground">Register</a>}
             {!session && <a href="#" onClick={() => setShowLoginModal(true)} className="text-muted-foreground">Login</a>}
           </div>
           {session && (
@@ -336,6 +338,7 @@ const Index = ({ setShowLoginModal }) => {
           </div>
         </div>
       </main>
+      <RegisterModal isOpen={showRegisterModal} onClose={() => setShowRegisterModal(false)} />
     </div>
   );
 };
