@@ -11,10 +11,10 @@ import { supabase } from './integrations/supabase';
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [balance, setBalance] = useState(0);
+  const [balances, setBalances] = useState({});
 
   useEffect(() => {
-    const fetchBalance = async () => {
+    const fetchBalances = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const { data, error } = await supabase
@@ -23,16 +23,16 @@ const App = () => {
           .eq('id', user.id)
           .single();
 
-        if (data) {
-          setBalance(data.balance);
+        if (data && data.balance) {
+          setBalances(JSON.parse(data.balance));
         }
       }
     };
 
-    fetchBalance();
+    fetchBalances();
 
     const authListener = supabase.auth.onAuthStateChange(() => {
-      fetchBalance();
+      fetchBalances();
     });
 
     return () => {
@@ -48,7 +48,7 @@ const App = () => {
           <BrowserRouter>
             <Routes>
               {navItems.map(({ to, page }) => (
-                <Route key={to} path={to} element={React.createElement(page, { balance })} />
+                <Route key={to} path={to} element={React.createElement(page, { balances })} />
               ))}
             </Routes>
           </BrowserRouter>

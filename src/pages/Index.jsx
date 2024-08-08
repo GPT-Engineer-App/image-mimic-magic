@@ -6,12 +6,13 @@ import { useSupabaseAuth } from '../integrations/supabase/auth';
 import { supabase } from '../integrations/supabase';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-const Index = ({ balance }) => {
+const Index = ({ balances }) => {
   const { session } = useSupabaseAuth() || {};
   const [username, setUsername] = useState('');
   const [wagerAmount, setWagerAmount] = useState(10);
   const [winChance, setWinChance] = useState(50);
   const [currency, setCurrency] = useState('BTC');
+  const currencies = Object.keys(balances);
 
   useEffect(() => {
     if (session) {
@@ -55,13 +56,15 @@ const Index = ({ balance }) => {
               <Select value={currency} onValueChange={setCurrency}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue>
-                    Balance: {balance.toFixed(4)} {currency}
+                    Balance: {balances[currency]?.toFixed(4) || '0.0000'} {currency}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="BTC">BTC</SelectItem>
-                  <SelectItem value="ETH">ETH</SelectItem>
-                  <SelectItem value="USD">USD</SelectItem>
+                  {currencies.map((curr) => (
+                    <SelectItem key={curr} value={curr}>
+                      {curr}: {balances[curr]?.toFixed(4) || '0.0000'}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -75,8 +78,12 @@ const Index = ({ balance }) => {
           
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-muted-foreground mb-1">Balance:</label>
-              <div className="text-lg font-semibold">{balance.toFixed(4)} BTC</div>
+              <label className="block text-sm font-medium text-muted-foreground mb-1">Balances:</label>
+              {currencies.map((curr) => (
+                <div key={curr} className="text-lg font-semibold">
+                  {curr}: {balances[curr]?.toFixed(4) || '0.0000'}
+                </div>
+              ))}
             </div>
 
             <div>
