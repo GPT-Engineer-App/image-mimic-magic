@@ -19,17 +19,75 @@ const fromSupabase = async (query) => {
 
 /* supabase integration types
 
+### bets
+
+| name         | type                       | format | required |
+|--------------|----------------------------|--------|----------|
+| id           | int8                       | number | true     |
+| created_at   | timestamp with time zone   | string | true     |
+| user_id      | int8                       | number | false    |
+| wager_amount | numeric                    | number | false    |
+| win_chance   | numeric                    | number | false    |
+| result       | boolean                    | boolean| false    |
+| currency     | text                       | string | false    |
+| server_seed  | text                       | string | false    |
+| client_seed  | text                       | string | false    |
+
 ### users
 
-| name       | type                     | format | required |
-|------------|--------------------------|--------|----------|
-| id         | int8                     | number | true     |
-| created_at | timestamp with time zone | string | true     |
-| username   | text                     | string | false    |
+| name       | type                       | format | required |
+|------------|----------------------------|--------|----------|
+| id         | int8                       | number | true     |
+| created_at | timestamp with time zone   | string | true     |
+| username   | text                       | string | false    |
+| balance    | json                       | object | false    |
+| email      | text                       | string | false    |
+| password   | text                       | string | false    |
 
 */
 
-// Hooks for users table
+// Bets hooks
+export const useBets = () => useQuery({
+    queryKey: ['bets'],
+    queryFn: () => fromSupabase(supabase.from('bets').select('*')),
+});
+
+export const useBet = (id) => useQuery({
+    queryKey: ['bets', id],
+    queryFn: () => fromSupabase(supabase.from('bets').select('*').eq('id', id).single()),
+});
+
+export const useAddBet = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (newBet) => fromSupabase(supabase.from('bets').insert([newBet])),
+        onSuccess: () => {
+            queryClient.invalidateQueries('bets');
+        },
+    });
+};
+
+export const useUpdateBet = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, ...updateData }) => fromSupabase(supabase.from('bets').update(updateData).eq('id', id)),
+        onSuccess: () => {
+            queryClient.invalidateQueries('bets');
+        },
+    });
+};
+
+export const useDeleteBet = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (id) => fromSupabase(supabase.from('bets').delete().eq('id', id)),
+        onSuccess: () => {
+            queryClient.invalidateQueries('bets');
+        },
+    });
+};
+
+// Users hooks
 export const useUsers = () => useQuery({
     queryKey: ['users'],
     queryFn: () => fromSupabase(supabase.from('users').select('*')),
