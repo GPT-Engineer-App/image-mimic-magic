@@ -15,9 +15,11 @@ const RegisterModal = ({ isOpen, onClose }) => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Clear error when modal is opened
     if (isOpen) {
       setError('');
+      setUsername('');
+      setEmail('');
+      setPassword('');
     }
   }, [isOpen]);
 
@@ -26,17 +28,22 @@ const RegisterModal = ({ isOpen, onClose }) => {
     setLoading(true);
     setError('');
     try {
-      // First, get the current user count
-      const { count, error: countError } = await supabase
+      // Check if the username already exists
+      const { data: existingUser, error: userCheckError } = await supabase
         .from('users')
-        .select('*', { count: 'exact', head: true });
+        .select('username')
+        .eq('username', username)
+        .single();
 
-      if (countError) throw countError;
+      if (userCheckError && userCheckError.code !== 'PGRST116') {
+        throw userCheckError;
+      }
 
-      const userNumber = count + 1;
-      const fullUsername = `${username}#${userNumber}`;
+      if (existingUser) {
+        throw new Error('Username already exists. Please choose a different username.');
+      }
 
-      // Now register the user
+      // Register the user
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -45,16 +52,16 @@ const RegisterModal = ({ isOpen, onClose }) => {
       if (error) throw error;
 
       if (data.user) {
-        // Add the user to the users table with the full username
+        // Add the user to the users table
         const { error: insertError } = await supabase
           .from('users')
-          .insert({ id: data.user.id, username: fullUsername, email });
+          .insert({ id: data.user.id, username, email, balance: JSON.stringify({}) });
 
         if (insertError) throw insertError;
 
         toast({
           title: "Registration successful",
-          description: `Welcome, ${fullUsername}!`,
+          description: `Welcome, ${username}! Please check your email to confirm your account.`,
         });
 
         onClose();
