@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -12,7 +11,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { User, Settings, LogOut } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
 
-const Index = () => {
+const Index = ({ setShowLoginModal }) => {
   const { session, logout } = useSupabaseAuth() || {};
   const [email, setEmail] = useState('');
   const [balances, setBalances] = useState({});
@@ -87,11 +86,7 @@ const Index = () => {
   const rollDice = async () => {
     setBetResult(null);
     if (!session) {
-      toast({
-        title: "Error",
-        description: "You must be logged in to play.",
-        variant: "destructive",
-      });
+      setShowLoginModal(true);
       return;
     }
 
@@ -190,7 +185,7 @@ const Index = () => {
             <a href="#" className="text-muted-foreground">Admin</a>
             <a href="#" className="text-muted-foreground">Wallet</a>
             {!session && <a href="#" className="text-muted-foreground">Register</a>}
-            {!session && <a href="/login" className="text-muted-foreground">Login</a>}
+            {!session && <a href="#" onClick={() => setShowLoginModal(true)} className="text-muted-foreground">Login</a>}
           </div>
           {session && (
             <div className="flex items-center space-x-4">

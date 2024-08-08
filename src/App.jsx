@@ -7,11 +7,13 @@ import { navItems } from "./nav-items";
 import { SupabaseAuthProvider } from "./integrations/supabase/auth";
 import { useState, useEffect } from 'react';
 import { supabase } from './integrations/supabase';
+import LoginModal from './components/LoginModal';
 
 const queryClient = new QueryClient();
 
 const App = () => {
   const [balances, setBalances] = useState({});
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   useEffect(() => {
     const fetchBalances = async () => {
@@ -58,9 +60,10 @@ const App = () => {
           <BrowserRouter>
             <Routes>
               {navItems.map(({ to, page }) => (
-                <Route key={to} path={to} element={React.createElement(page, { balances })} />
+                <Route key={to} path={to} element={React.createElement(page, { balances, setShowLoginModal })} />
               ))}
             </Routes>
+            <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
           </BrowserRouter>
         </TooltipProvider>
       </SupabaseAuthProvider>

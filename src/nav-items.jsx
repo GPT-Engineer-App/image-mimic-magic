@@ -1,5 +1,4 @@
 import Index from "./pages/Index.jsx";
-import Login from "./pages/Login.jsx";
 import Profile from "./pages/Profile.jsx";
 
 /**
@@ -10,11 +9,6 @@ export const navItems = [
     title: "Home",
     to: "/",
     page: Index,
-  },
-  {
-    title: "Login",
-    to: "/login",
-    page: Login,
   },
   {
     title: "Profile",
