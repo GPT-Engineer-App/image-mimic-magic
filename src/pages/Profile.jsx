@@ -45,17 +45,28 @@ const Profile = () => {
         updates.password = password;
       }
 
-      const { error } = await supabase.auth.updateUser(updates);
+      const { data, error } = await supabase.auth.updateUser(updates);
       if (error) throw error;
 
-      toast({
-        title: "Profile updated",
-        description: "Your profile has been updated successfully.",
-      });
+      if (data) {
+        toast({
+          title: "Profile updated",
+          description: "Your profile has been updated successfully.",
+        });
 
-      // Clear password fields after successful update
-      setPassword('');
-      setConfirmPassword('');
+        // Clear password fields after successful update
+        setPassword('');
+        setConfirmPassword('');
+
+        // Update email state if it was changed
+        setEmail(data.user.email);
+      } else {
+        toast({
+          title: "Update failed",
+          description: "No changes were made to your profile.",
+          variant: "warning",
+        });
+      }
     } catch (error) {
       toast({
         title: "Update failed",
