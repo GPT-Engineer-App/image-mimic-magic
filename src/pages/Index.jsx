@@ -49,7 +49,7 @@ const Index = () => {
             <a href="#" className="text-muted-foreground">Admin</a>
             <a href="#" className="text-muted-foreground">Wallet</a>
             {!session && <a href="#" className="text-muted-foreground">Register</a>}
-            {!session && <a href="#" className="text-muted-foreground">Login</a>}
+            {!session && <a href="/login" className="text-muted-foreground">Login</a>}
           </div>
           {session && (
             <div className="flex items-center space-x-4">
