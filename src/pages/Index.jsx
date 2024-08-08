@@ -11,7 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { User, Settings, LogOut } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
-import RegisterModal from '../components/RegisterModal';
+import RegisterModal from '@/components/RegisterModal';
 
 const Index = ({ setShowLoginModal }) => {
   const { session, logout } = useSupabaseAuth() || {};
