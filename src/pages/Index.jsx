@@ -58,7 +58,17 @@ const Index = () => {
     try {
       const { data, error } = await supabase
         .from('bets')
-        .select('*')
+        .select(`
+          id,
+          created_at,
+          user_id,
+          wager_amount,
+          win_chance,
+          result,
+          payout,
+          currency,
+          users (username)
+        `)
         .order('created_at', { ascending: false })
         .limit(10);
 
@@ -66,6 +76,11 @@ const Index = () => {
       setRecentBets(data);
     } catch (error) {
       console.error('Error fetching recent bets:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch recent bets.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -80,37 +95,45 @@ const Index = () => {
       return;
     }
 
+    if (wagerAmount <= 0 || wagerAmount > balances[currency]) {
+      toast({
+        title: "Invalid wager",
+        description: "Please enter a valid wager amount.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('roll-dice', {
-        body: JSON.stringify({
-          wagerAmount,
-          winChance,
-          clientSeed: clientSeed || undefined,
-          currency,
-        }),
-      });
+      const { data: userData } = await supabase
+        .from('users')
+        .select('balance')
+        .eq('id', session.user.id)
+        .single();
 
-      if (error) throw error;
+      const currentBalance = JSON.parse(userData.balance)[currency] || 0;
 
-      const { result, updatedBalance, betId, payout } = data;
+      if (wagerAmount > currentBalance) {
+        throw new Error("Insufficient balance");
+      }
 
-      // Update local balance
-      setBalances(prev => ({
-        ...prev,
-        [currency]: updatedBalance,
-      }));
+      const result = Math.random() < (winChance / 100);
+      const payout = result ? (wagerAmount * (100 / winChance)) : 0;
+      const updatedBalance = result ? (currentBalance + payout - wagerAmount) : (currentBalance - wagerAmount);
 
-      // Update localStorage
-      const userData = JSON.parse(localStorage.getItem('userData'));
-      userData.balance = JSON.stringify({
-        ...JSON.parse(userData.balance),
-        [currency]: updatedBalance,
-      });
-      localStorage.setItem('userData', JSON.stringify(userData));
+      // Update user balance in the database
+      const { error: updateError } = await supabase
+        .from('users')
+        .update({
+          balance: JSON.stringify({
+            ...JSON.parse(userData.balance),
+            [currency]: updatedBalance,
+          }),
+        })
+        .eq('id', session.user.id);
 
-      // Set bet result
-      setBetResult({ result, payout });
+      if (updateError) throw updateError;
 
       // Insert bet into bets table
       const { error: insertError } = await supabase
@@ -127,6 +150,14 @@ const Index = () => {
         });
 
       if (insertError) throw insertError;
+
+      // Update local state
+      setBalances(prev => ({
+        ...prev,
+        [currency]: updatedBalance,
+      }));
+
+      setBetResult({ result, payout });
 
       toast({
         title: result ? "You won!" : "You lost",
@@ -296,11 +327,11 @@ const Index = () => {
               <tbody>
                 {recentBets.map((bet) => (
                   <tr key={bet.id}>
-                    <td className="px-4 py-2">{bet.user_id}</td>
+                    <td className="px-4 py-2">{bet.users?.username || 'Anonymous'}</td>
                     <td className="px-4 py-2">{bet.win_chance}%</td>
-                    <td className="px-4 py-2">{bet.wager_amount} {bet.currency}</td>
+                    <td className="px-4 py-2">{bet.wager_amount.toFixed(4)} {bet.currency}</td>
                     <td className="px-4 py-2">{bet.result ? 'Win' : 'Loss'}</td>
-                    <td className="px-4 py-2">{bet.payout} {bet.currency}</td>
+                    <td className="px-4 py-2">{bet.payout.toFixed(4)} {bet.currency}</td>
                     <td className="px-4 py-2">{bet.id}</td>
                   </tr>
                 ))}
